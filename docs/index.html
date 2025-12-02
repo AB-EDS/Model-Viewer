@@ -1,32 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loading 3D Model…</title>
-<script>
-function redirect() {
-    var ua = navigator.userAgent || navigator.vendor || window.opera;
-
-    // iPhone / iPad → USDZ
-    if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-        window.location.href = "https://drive.google.com/uc?export=download&id=1TKcUBPwsqbqBh0pVh1_ReHF1ZLChwVhQ";
-        return;
-    }
-
-    // Android → GLB
-    if (/android/i.test(ua)) {
-        window.location.href = "https://drive.google.com/uc?export=download&id=1g6AA5ZNDKU8LEDY6P1bpeRg_LdkTJQsj";
-        return;
-    }
-
-    // Desktop fallback → GLB
-    window.location.href = "https://drive.google.com/uc?export=download&id=1g6AA5ZNDKU8LEDY6P1bpeRg_LdkTJQsj";
-}
-window.onload = redirect;
-</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Model Viewer Redirect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        a.button {
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 25px;
+            font-size: 18px;
+            text-decoration: none;
+            background: #0078ff;
+            color: white;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
-<h2 style="text-align:center; font-family:sans-serif;">Loading 3D Model…</h2>
+    <div class="container">
+        <h2>Loading 3D Model…</h2>
+        <p>If download does not start automatically, choose an option below.</p>
+
+        <script>
+            // NEW Google Drive links
+            const glbUrl = "https://drive.google.com/uc?export=download&id=17mUtreexZ1gw9zPJFwghnH6RI7MRNEDn";
+            const usdzUrl = "https://drive.google.com/uc?export=download&id=1TKcUBPwsqbqBh0pVh1_ReHF1ZLChwVhQ";
+
+            const userAgent = navigator.userAgent.toLowerCase();
+
+            function isIOS() {
+                return /iphone|ipad|ipod/.test(userAgent);
+            }
+
+            function isAndroid() {
+                return /android/.test(userAgent);
+            }
+
+            // Auto-redirect logic
+            if (isIOS()) {
+                window.location.href = usdzUrl;
+            } else if (isAndroid()) {
+                window.location.href = glbUrl;
+            }
+        </script>
+
+        <h3>Download Manually:</h3>
+        <a class="button" href="https://drive.google.com/uc?export=download&id=1TKcUBPwsqbqBh0pVh1_ReHF1ZLChwVhQ">Download USDZ (iPhone)</a>
+        <a class="button" href="https://drive.google.com/uc?export=download&id=17mUtreexZ1gw9zPJFwghnH6RI7MRNEDn">Download GLB (Android)</a>
+    </div>
 </body>
 </html>
