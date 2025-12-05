@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator - 3D Models</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step h2 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            min-height: 100px;
+            font-family: monospace;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 5px 10px 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .result {
+            background: #e8f5e9;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border-left: 5px solid #28a745;
+            display: none;
+        }
+        
+        .result h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .url-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .help-text {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #1565c0;
+            font-size: 0.95em;
+            border-left: 4px solid #2196f3;
+        }
+
+        .examples {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .examples h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .examples code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 QR Code Generator</h1>
+            <p>Automated 3D Model QR Code Creation</p>
+        </div>
+        
+        <div class="content">
+            <div class="step">
+                <h2><span class="step-number">⚙️</span> Configuration</h2>
+                <div class="input-group">
+                    <label for="githubUrl">Your GitHub Pages URL:</label>
+                    <input type="text" id="githubUrl" placeholder="https://ab-eds.github.io/Model-Viewer/viewer.html" value="https://ab-eds.github.io/Model-Viewer/viewer.html">
+                    <div class="help-text">
+                        📌 This is your viewer page URL. Update this to match your GitHub Pages setup.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <h2><span class="step-number">1</span> Paste Google Drive Share Link</h2>
+                <div class="input-group">
+                    <label for="driveLink">Google Drive Share Link:</label>
+                    <textarea id="driveLink" placeholder="Paste your Google Drive share link here...
+Examples:
+https://drive.google.com/file/d/1ABC123XYZ456/view?usp=sharing
+https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
+                    <div class="help-text">
+                        💡 <strong>How to get this:</strong>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Right-click your STEP file in Google Drive</li>
+                            <li>Click "Share"</li>
+                            <li>Set to "Anyone with the link"</li>
+                            <li>Click "Copy link"</li>
+                            <li>Paste it here!</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="examples">
+                    <h4>📋 Supported URL Formats:</h4>
+                    <code>https://drive.google.com/file/d/FILE_ID/view?usp=sharing</code>
+                    <code>https://drive.google.com/open?id=FILE_ID</code>
+                    <code>https://docs.google.com/file/d/FILE_ID/edit</code>
+                </div>
+
+                <div class="error" id="error"></div>
+
+                <button class="btn" onclick="generateQR()">✨ Generate QR Code & URL</button>
+            </div>
+
+            <div class="result" id="result">
+                <h3>✅ Your QR Code is Ready!</h3>
+                
+                <div class="qr-display" id="qrcode"></div>
+                
+                <div class="input-group">
+                    <label>Generated URL:</label>
+                    <div class="url-box" id="generatedUrl"></div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="copyUrl()">📋 Copy URL</button>
+                <button class="btn btn-secondary" onclick="downloadQR()">⬇️ Download QR Code</button>
+                <button class="btn" onclick="testUrl()">🧪 Test in New Tab</button>
+                <button class="btn" onclick="reset()">🔄 Create Another</button>
+
+                <div class="help-text" style="margin-top: 20px;">
+                    <strong>Next Steps:</strong><br>
+                    1. Download the QR code image<br>
+                    2. Print it on a label or equipment tag<br>
+                    3. Users can scan it to view your 3D model instantly!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        let generatedUrl = '';
+        let qrCode = null;
+
+        function extractFileId(url) {
+            url = url.trim();
+
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                /\/d\/([a-zA-Z0-9_-]+)/,
+                /id=([a-zA-Z0-9_-]+)/,
+                /\/open\?id=([a-zA-Z0-9_-]+)/,
+                /folders\/([a-zA-Z0-9_-]+)/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            
+            return null;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function generateQR() {
+            const driveLink = document.getElementById('driveLink').value.trim();
+            const githubUrl = document.getElementById('githubUrl').value.trim();
+
+            if (!driveLink) {
+                showError('Please paste a Google Drive share link!');
+                return;
+            }
+
+            if (!githubUrl) {
+                showError('Please enter your GitHub Pages URL!');
+                return;
+            }
+
+            const fileId = extractFileId(driveLink);
+
+            if (!fileId) {
+                showError('Could not extract File ID from the link. Please make sure you copied the entire share link from Google Drive.');
+                return;
+            }
+
+            generatedUrl = `${githubUrl}?file=${fileId}`;
+
+            document.getElementById('generatedUrl').textContent = generatedUrl;
+            document.getElementById('result').style.display = 'block';
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            qrCode = new QRCode(qrContainer, {
+                text: generatedUrl,
+                width: 300,
+                height: 300,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function copyUrl() {
+            navigator.clipboard.writeText(generatedUrl).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy. Please copy manually:\n\n' + generatedUrl);
+            });
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const url = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                const fileId = extractFileId(document.getElementById('driveLink').value);
+                link.download = `qr-code-${fileId}.png`;
+                link.href = url;
+                link.click();
+            }
+        }
+
+        function testUrl() {
+            if (generatedUrl) {
+                window.open(generatedUrl, '_blank');
+            }
+        }
+
+        function reset() {
+            document.getElementById('driveLink').value = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('driveLink').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('driveLink').focus();
+    </script>
+</body>
+</html>
