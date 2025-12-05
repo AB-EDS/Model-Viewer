@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator - 3D Models</title>
+    <title>GitHub Model QR Generator</title>
     <style>
         * {
             margin: 0;
@@ -104,22 +104,6 @@
             border-color: #667eea;
         }
         
-        .input-group textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            min-height: 100px;
-            font-family: monospace;
-            transition: border-color 0.3s;
-        }
-        
-        .input-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -194,7 +178,7 @@
             border-left: 4px solid #2196f3;
         }
 
-        .examples {
+        .info-box {
             background: #fff3cd;
             padding: 20px;
             border-radius: 8px;
@@ -202,19 +186,18 @@
             border-left: 4px solid #ffc107;
         }
 
-        .examples h4 {
+        .info-box h4 {
             color: #856404;
             margin-bottom: 10px;
         }
 
-        .examples code {
+        .info-box code {
             display: block;
             background: white;
             padding: 10px;
             border-radius: 5px;
             margin: 5px 0;
             font-size: 0.9em;
-            word-break: break-all;
         }
 
         .error {
@@ -232,51 +215,41 @@
     <div class="container">
         <div class="header">
             <h1>🚀 QR Code Generator</h1>
-            <p>Automated 3D Model QR Code Creation</p>
+            <p>For GitHub-Hosted 3D Models</p>
         </div>
         
         <div class="content">
             <div class="step">
-                <h2><span class="step-number">⚙️</span> Configuration</h2>
-                <div class="input-group">
-                    <label for="githubUrl">Your GitHub Pages URL:</label>
-                    <input type="text" id="githubUrl" placeholder="https://ab-eds.github.io/Model-Viewer/viewer.html" value="https://ab-eds.github.io/Model-Viewer/viewer.html">
-                    <div class="help-text">
-                        📌 This is your viewer page URL. Update this to match your GitHub Pages setup.
-                    </div>
+                <h2><span class="step-number">📁</span> File Location</h2>
+                <div class="info-box">
+                    <h4>⚠️ Important Setup Required:</h4>
+                    <p style="margin-bottom: 10px;">Your STEP files must be uploaded to GitHub in a <strong>models</strong> folder:</p>
+                    <code>Model-Viewer/models/your-file.step</code>
+                    <p style="margin-top: 10px; color: #856404;">
+                        <strong>To upload:</strong><br>
+                        1. Go to your repository<br>
+                        2. Click "Add file" → "Create new file"<br>
+                        3. Type: <code>models/placeholder.txt</code><br>
+                        4. Commit to create the folder<br>
+                        5. Then upload your STEP files into that folder
+                    </p>
                 </div>
             </div>
 
             <div class="step">
-                <h2><span class="step-number">1</span> Paste Google Drive Share Link</h2>
+                <h2><span class="step-number">1</span> Enter Model Filename</h2>
                 <div class="input-group">
-                    <label for="driveLink">Google Drive Share Link:</label>
-                    <textarea id="driveLink" placeholder="Paste your Google Drive share link here...
-Examples:
-https://drive.google.com/file/d/1ABC123XYZ456/view?usp=sharing
-https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
+                    <label for="modelFile">STEP Filename (including extension):</label>
+                    <input type="text" id="modelFile" placeholder="pump-assembly.step">
                     <div class="help-text">
-                        💡 <strong>How to get this:</strong>
-                        <ol style="margin-left: 20px; margin-top: 10px;">
-                            <li>Right-click your STEP file in Google Drive</li>
-                            <li>Click "Share"</li>
-                            <li>Set to "Anyone with the link"</li>
-                            <li>Click "Copy link"</li>
-                            <li>Paste it here!</li>
-                        </ol>
+                        💡 Just enter the filename (e.g., <strong>pump-assembly.step</strong>)<br>
+                        The file must be in your <code>models/</code> folder in your GitHub repository.
                     </div>
-                </div>
-
-                <div class="examples">
-                    <h4>📋 Supported URL Formats:</h4>
-                    <code>https://drive.google.com/file/d/FILE_ID/view?usp=sharing</code>
-                    <code>https://drive.google.com/open?id=FILE_ID</code>
-                    <code>https://docs.google.com/file/d/FILE_ID/edit</code>
                 </div>
 
                 <div class="error" id="error"></div>
 
-                <button class="btn" onclick="generateQR()">✨ Generate QR Code & URL</button>
+                <button class="btn" onclick="generateQR()">✨ Generate QR Code</button>
             </div>
 
             <div class="result" id="result">
@@ -298,7 +271,8 @@ https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
                     <strong>Next Steps:</strong><br>
                     1. Download the QR code image<br>
                     2. Print it on a label or equipment tag<br>
-                    3. Users can scan it to view your 3D model instantly!
+                    3. Users can scan it to view your 3D model instantly!<br><br>
+                    <strong>⚠️ Make sure your STEP file is uploaded to GitHub first!</strong>
                 </div>
             </div>
         </div>
@@ -308,28 +282,6 @@ https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
 
     <script>
         let generatedUrl = '';
-        let qrCode = null;
-
-        function extractFileId(url) {
-            url = url.trim();
-
-            const patterns = [
-                /\/file\/d\/([a-zA-Z0-9_-]+)/,
-                /\/d\/([a-zA-Z0-9_-]+)/,
-                /id=([a-zA-Z0-9_-]+)/,
-                /\/open\?id=([a-zA-Z0-9_-]+)/,
-                /folders\/([a-zA-Z0-9_-]+)/
-            ];
-            
-            for (let pattern of patterns) {
-                const match = url.match(pattern);
-                if (match && match[1]) {
-                    return match[1];
-                }
-            }
-            
-            return null;
-        }
 
         function showError(message) {
             const errorDiv = document.getElementById('error');
@@ -341,35 +293,29 @@ https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
         }
 
         function generateQR() {
-            const driveLink = document.getElementById('driveLink').value.trim();
-            const githubUrl = document.getElementById('githubUrl').value.trim();
+            const modelFile = document.getElementById('modelFile').value.trim();
 
-            if (!driveLink) {
-                showError('Please paste a Google Drive share link!');
+            if (!modelFile) {
+                showError('Please enter a model filename!');
                 return;
             }
 
-            if (!githubUrl) {
-                showError('Please enter your GitHub Pages URL!');
+            if (!modelFile.match(/\.(step|stp|stl|obj)$/i)) {
+                showError('Filename should end with .step, .stp, .stl, or .obj');
                 return;
             }
 
-            const fileId = extractFileId(driveLink);
-
-            if (!fileId) {
-                showError('Could not extract File ID from the link. Please make sure you copied the entire share link from Google Drive.');
-                return;
-            }
-
-            generatedUrl = `${githubUrl}?file=${fileId}`;
+            // Generate the viewer URL
+            generatedUrl = `https://ab-eds.github.io/Model-Viewer/viewer.html?model=${encodeURIComponent(modelFile)}`;
 
             document.getElementById('generatedUrl').textContent = generatedUrl;
             document.getElementById('result').style.display = 'block';
 
+            // Generate QR Code
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
             
-            qrCode = new QRCode(qrContainer, {
+            new QRCode(qrContainer, {
                 text: generatedUrl,
                 width: 300,
                 height: 300,
@@ -399,8 +345,8 @@ https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
             if (canvas) {
                 const url = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                const fileId = extractFileId(document.getElementById('driveLink').value);
-                link.download = `qr-code-${fileId}.png`;
+                const modelFile = document.getElementById('modelFile').value.trim();
+                link.download = `qr-code-${modelFile.replace(/\.[^/.]+$/, '')}.png`;
                 link.href = url;
                 link.click();
             }
@@ -413,13 +359,13 @@ https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
         }
 
         function reset() {
-            document.getElementById('driveLink').value = '';
+            document.getElementById('modelFile').value = '';
             document.getElementById('result').style.display = 'none';
-            document.getElementById('driveLink').focus();
+            document.getElementById('modelFile').focus();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        document.getElementById('driveLink').focus();
+        document.getElementById('modelFile').focus();
     </script>
 </body>
 </html>
