@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Model Viewer - Automated</title>
+    <title>3D Model Viewer</title>
     <style>
         * {
             margin: 0;
@@ -244,7 +244,7 @@
 <body>
     <div class="header">
         <h1>🔧 3D Model Viewer</h1>
-        <p>Automated Model Loading System</p>
+        <p>GitHub-Hosted Models</p>
     </div>
     
     <div class="container">
@@ -258,8 +258,8 @@
                     <div class="info-value" id="fileName">-</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Google Drive ID</div>
-                    <div class="info-value" id="fileId">-</div>
+                    <div class="info-label">Model Path</div>
+                    <div class="info-value" id="modelPath">-</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Loaded At</div>
@@ -300,66 +300,35 @@
         </div>
     </div>
 
-    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        function extractFileIdFromUrl(url) {
-            const patterns = [
-                /\/file\/d\/([a-zA-Z0-9_-]+)/,
-                /id=([a-zA-Z0-9_-]+)/,
-                /folders\/([a-zA-Z0-9_-]+)/
-            ];
-            
-            for (let pattern of patterns) {
-                const match = url.match(pattern);
-                if (match && match[1]) {
-                    return match[1];
-                }
-            }
-            
-            return null;
-        }
-
-        function extractFileNameFromUrl(url) {
-            const urlObj = new URL(url);
-            const pathParts = urlObj.pathname.split('/');
-            return pathParts[pathParts.length - 1] || 'Unknown Model';
-        }
-
+        // Get model parameter from URL
+        // Usage: viewer.html?model=pump-assembly.step
         const urlParams = new URLSearchParams(window.location.search);
-        let fileId = urlParams.get('file');
-        const driveUrl = urlParams.get('url');
-        const shareLink = urlParams.get('share');
-
-        let fileName = 'CAD Model';
-        let currentPageUrl = window.location.href;
+        const modelFile = urlParams.get('model');
+        
+        const currentPageUrl = window.location.href;
 
         function init() {
-            if (!fileId && driveUrl) {
-                fileId = extractFileIdFromUrl(decodeURIComponent(driveUrl));
-                fileName = extractFileNameFromUrl(decodeURIComponent(driveUrl));
-            } else if (!fileId && shareLink) {
-                fileId = extractFileIdFromUrl(decodeURIComponent(shareLink));
-            }
-
-            if (!fileId) {
-                showError('No Google Drive file specified. Please use one of these URL formats:<br><br>' +
-                    '• ?file=YOUR_FILE_ID<br>' +
-                    '• ?url=FULL_GOOGLE_DRIVE_URL<br>' +
-                    '• ?share=GOOGLE_DRIVE_SHARE_LINK<br><br>' +
-                    'Example: viewer.html?file=1ABC123XYZ456');
+            if (!modelFile) {
+                showError('No model specified. Please add ?model=YOUR_MODEL_FILE.step to the URL<br><br>' +
+                    'Example: viewer.html?model=pump-assembly.step');
                 document.getElementById('loading').style.display = 'none';
                 return;
             }
 
-            document.getElementById('modelTitle').textContent = fileName;
-            document.getElementById('fileName').textContent = fileName;
-            document.getElementById('fileId').textContent = fileId;
+            // Construct GitHub raw content URL
+            // Format: https://raw.githubusercontent.com/USERNAME/REPO/main/models/FILE.step
+            const githubRawUrl = `https://raw.githubusercontent.com/AB-EDS/Model-Viewer/main/models/${modelFile}`;
+            
+            document.getElementById('modelTitle').textContent = modelFile.replace(/\.[^/.]+$/, "").replace(/-/g, ' ');
+            document.getElementById('fileName').textContent = modelFile;
+            document.getElementById('modelPath').textContent = `models/${modelFile}`;
             document.getElementById('loadTime').textContent = new Date().toLocaleString();
 
-            const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-            const viewerUrl = `https://3dviewer.net/embed.html#model=${encodeURIComponent(directDownloadUrl)}$backgroundcolor=240,245,250,255$defaultcolor=70,130,180$edgesettings=on,0,0,0,1`;
+            // Construct 3DViewer.net embed URL
+            const viewerUrl = `https://3dviewer.net/embed.html#model=${encodeURIComponent(githubRawUrl)}$backgroundcolor=240,245,250,255$defaultcolor=70,130,180$edgesettings=on,0,0,0,1`;
             
             const iframe = document.getElementById('viewer');
             iframe.src = viewerUrl;
@@ -411,7 +380,7 @@
             if (canvas) {
                 const url = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.download = `qr-code-${fileId || 'model'}.png`;
+                link.download = `qr-code-${modelFile || 'model'}.png`;
                 link.href = url;
                 link.click();
             }
