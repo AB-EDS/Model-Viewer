@@ -244,7 +244,7 @@
 <body>
     <div class="header">
         <h1>🔧 3D Model Viewer</h1>
-        <p>GitHub-Hosted Models</p>
+        <p>CDN-Hosted Models</p>
     </div>
     
     <div class="container">
@@ -304,7 +304,7 @@
 
     <script>
         // Get model parameter from URL
-        // Usage: viewer.html?model=pump-assembly.step
+        // Usage: viewer.html?model=C25026-1201-A.STEP
         const urlParams = new URLSearchParams(window.location.search);
         const modelFile = urlParams.get('model');
         
@@ -312,23 +312,23 @@
 
         function init() {
             if (!modelFile) {
-                showError('No model specified. Please add ?model=YOUR_MODEL_FILE.step to the URL<br><br>' +
-                    'Example: viewer.html?model=pump-assembly.step');
+                showError('No model specified. Please add ?model=YOUR_MODEL_FILE.STEP to the URL<br><br>' +
+                    'Example: viewer.html?model=C25026-1201-A.STEP');
                 document.getElementById('loading').style.display = 'none';
                 return;
             }
 
-            // Construct GitHub raw content URL
-            // Format: https://raw.githubusercontent.com/USERNAME/REPO/main/models/FILE.step
-            const githubRawUrl = `https://raw.githubusercontent.com/AB-EDS/Model-Viewer/main/models/${modelFile}`;
+            // Use jsDelivr CDN which mirrors GitHub and allows CORS/iframe embedding
+            // Format: https://cdn.jsdelivr.net/gh/USERNAME/REPO@BRANCH/path/to/file
+            const cdnUrl = `https://cdn.jsdelivr.net/gh/AB-EDS/Model-Viewer@main/models/${encodeURIComponent(modelFile)}`;
             
-            document.getElementById('modelTitle').textContent = modelFile.replace(/\.[^/.]+$/, "").replace(/-/g, ' ');
+            document.getElementById('modelTitle').textContent = modelFile.replace(/\.[^/.]+$/, "").replace(/-|_/g, ' ');
             document.getElementById('fileName').textContent = modelFile;
             document.getElementById('modelPath').textContent = `models/${modelFile}`;
             document.getElementById('loadTime').textContent = new Date().toLocaleString();
 
-            // Construct 3DViewer.net embed URL
-            const viewerUrl = `https://3dviewer.net/embed.html#model=${encodeURIComponent(githubRawUrl)}$backgroundcolor=240,245,250,255$defaultcolor=70,130,180$edgesettings=on,0,0,0,1`;
+            // Construct 3DViewer.net embed URL with jsDelivr CDN
+            const viewerUrl = `https://3dviewer.net/embed.html#model=${encodeURIComponent(cdnUrl)}$backgroundcolor=240,245,250,255$defaultcolor=70,130,180$edgesettings=on,0,0,0,1`;
             
             const iframe = document.getElementById('viewer');
             iframe.src = viewerUrl;
