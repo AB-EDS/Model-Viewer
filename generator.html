@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Model Viewer</title>
+    <title>QR Code Generator - 3D Models</title>
     <style>
         * {
             margin: 0;
@@ -13,365 +13,384 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: white;
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
-        }
-        
-        .header h1 {
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1em;
         }
         
         .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            max-width: 1400px;
-            width: 100%;
+            max-width: 900px;
             margin: 0 auto;
-        }
-        
-        .viewer-wrapper {
-            flex: 1;
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-            min-height: 600px;
-            position: relative;
         }
         
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            min-height: 600px;
-        }
-        
-        .model-info {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        
-        .model-info h2 {
-            color: #1e3c72;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        
-        .info-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #2a5298;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            color: #333;
-            font-size: 1.1em;
-            word-break: break-word;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
             text-align: center;
-            color: #666;
-            z-index: 10;
         }
         
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2a5298;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
         }
         
-        .error {
-            background: #fff3cd;
-            color: #856404;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #ffc107;
-            margin-bottom: 20px;
+        .content {
+            padding: 40px;
         }
         
-        .controls {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        .step {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
         }
         
-        .controls h3 {
-            color: #1e3c72;
+        .step h2 {
+            color: #667eea;
+            font-size: 1.5em;
             margin-bottom: 15px;
-        }
-        
-        .controls ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .controls li {
-            padding: 8px 0;
-            color: #555;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
         
-        .controls li::before {
-            content: "→";
-            color: #2a5298;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .qr-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .qr-section h3 {
-            color: #1e3c72;
-            margin-bottom: 15px;
-        }
-
-        #qrcode {
-            display: inline-block;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            margin: 15px 0;
-        }
-
-        .url-display {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-family: monospace;
-            word-break: break-all;
-            font-size: 0.9em;
-            color: #333;
-        }
-
-        .copy-btn {
-            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        .step-number {
+            background: #667eea;
             color: white;
-            border: none;
-            padding: 12px 30px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            min-height: 100px;
+            font-family: monospace;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             font-weight: 600;
-            margin: 10px 5px;
-        }
-
-        .copy-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.4);
-        }
-
-        .copy-btn:active {
-            transform: translateY(0);
+            display: inline-block;
+            margin: 10px 5px 10px 0;
         }
         
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.4em;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            iframe {
-                min-height: 400px;
-            }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .result {
+            background: #e8f5e9;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border-left: 5px solid #28a745;
+            display: none;
+        }
+        
+        .result h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .url-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .help-text {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #1565c0;
+            font-size: 0.95em;
+            border-left: 4px solid #2196f3;
+        }
+
+        .examples {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .examples h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .examples code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🔧 3D Model Viewer</h1>
-        <p>CDN-Hosted Models</p>
-    </div>
-    
     <div class="container">
-        <div id="errorMessage" class="error" style="display: none;"></div>
-        
-        <div class="model-info">
-            <h2 id="modelTitle">Loading Model...</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">File Name</div>
-                    <div class="info-value" id="fileName">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Model Path</div>
-                    <div class="info-value" id="modelPath">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Loaded At</div>
-                    <div class="info-value" id="loadTime">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value" id="status">Ready</div>
-                </div>
-            </div>
+        <div class="header">
+            <h1>🚀 QR Code Generator</h1>
+            <p>Automated 3D Model QR Code Creation</p>
         </div>
         
-        <div class="viewer-wrapper">
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <p>Loading 3D Model...</p>
+        <div class="content">
+            <div class="step">
+                <h2><span class="step-number">⚙️</span> Configuration</h2>
+                <div class="input-group">
+                    <label for="githubUrl">Your GitHub Pages URL:</label>
+                    <input type="text" id="githubUrl" placeholder="https://ab-eds.github.io/Model-Viewer/viewer.html" value="https://ab-eds.github.io/Model-Viewer/viewer.html">
+                    <div class="help-text">
+                        📌 This is your viewer page URL. Update this to match your GitHub Pages setup.
+                    </div>
+                </div>
             </div>
-            <iframe id="viewer" src=""></iframe>
-        </div>
 
-        <div class="qr-section">
-            <h3>📱 QR Code for this Model</h3>
-            <p style="color: #666; margin-bottom: 10px;">Scan this QR code to view this model on any device</p>
-            <div id="qrcode"></div>
-            <div class="url-display" id="currentUrl">-</div>
-            <button class="copy-btn" onclick="copyUrl()">📋 Copy URL</button>
-            <button class="copy-btn" onclick="downloadQR()">⬇️ Download QR Code</button>
-        </div>
-        
-        <div class="controls">
-            <h3>📱 Viewer Controls</h3>
-            <ul>
-                <li><strong>Rotate:</strong> Click and drag with left mouse button</li>
-                <li><strong>Pan:</strong> Click and drag with right mouse button</li>
-                <li><strong>Zoom:</strong> Use mouse wheel or pinch on touchscreen</li>
-                <li><strong>Reset:</strong> Double-click to reset the view</li>
-            </ul>
+            <div class="step">
+                <h2><span class="step-number">1</span> Paste Google Drive Share Link</h2>
+                <div class="input-group">
+                    <label for="driveLink">Google Drive Share Link:</label>
+                    <textarea id="driveLink" placeholder="Paste your Google Drive share link here...
+Examples:
+https://drive.google.com/file/d/1ABC123XYZ456/view?usp=sharing
+https://drive.google.com/open?id=1ABC123XYZ456"></textarea>
+                    <div class="help-text">
+                        💡 <strong>How to get this:</strong>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Right-click your STEP file in Google Drive</li>
+                            <li>Click "Share"</li>
+                            <li>Set to "Anyone with the link"</li>
+                            <li>Click "Copy link"</li>
+                            <li>Paste it here!</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="examples">
+                    <h4>📋 Supported URL Formats:</h4>
+                    <code>https://drive.google.com/file/d/FILE_ID/view?usp=sharing</code>
+                    <code>https://drive.google.com/open?id=FILE_ID</code>
+                    <code>https://docs.google.com/file/d/FILE_ID/edit</code>
+                </div>
+
+                <div class="error" id="error"></div>
+
+                <button class="btn" onclick="generateQR()">✨ Generate QR Code & URL</button>
+            </div>
+
+            <div class="result" id="result">
+                <h3>✅ Your QR Code is Ready!</h3>
+                
+                <div class="qr-display" id="qrcode"></div>
+                
+                <div class="input-group">
+                    <label>Generated URL:</label>
+                    <div class="url-box" id="generatedUrl"></div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="copyUrl()">📋 Copy URL</button>
+                <button class="btn btn-secondary" onclick="downloadQR()">⬇️ Download QR Code</button>
+                <button class="btn" onclick="testUrl()">🧪 Test in New Tab</button>
+                <button class="btn" onclick="reset()">🔄 Create Another</button>
+
+                <div class="help-text" style="margin-top: 20px;">
+                    <strong>Next Steps:</strong><br>
+                    1. Download the QR code image<br>
+                    2. Print it on a label or equipment tag<br>
+                    3. Users can scan it to view your 3D model instantly!
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        // Get model parameter from URL
-        // Usage: viewer.html?model=C25026-1201-A.STEP
-        const urlParams = new URLSearchParams(window.location.search);
-        const modelFile = urlParams.get('model');
-        
-        const currentPageUrl = window.location.href;
+        let generatedUrl = '';
+        let qrCode = null;
 
-        function init() {
-            if (!modelFile) {
-                showError('No model specified. Please add ?model=YOUR_MODEL_FILE.STEP to the URL<br><br>' +
-                    'Example: viewer.html?model=C25026-1201-A.STEP');
-                document.getElementById('loading').style.display = 'none';
+        function extractFileId(url) {
+            url = url.trim();
+
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                /\/d\/([a-zA-Z0-9_-]+)/,
+                /id=([a-zA-Z0-9_-]+)/,
+                /\/open\?id=([a-zA-Z0-9_-]+)/,
+                /folders\/([a-zA-Z0-9_-]+)/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            
+            return null;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function generateQR() {
+            const driveLink = document.getElementById('driveLink').value.trim();
+            const githubUrl = document.getElementById('githubUrl').value.trim();
+
+            if (!driveLink) {
+                showError('Please paste a Google Drive share link!');
                 return;
             }
 
-            // Use jsDelivr CDN which mirrors GitHub and allows CORS/iframe embedding
-            // Format: https://cdn.jsdelivr.net/gh/USERNAME/REPO@BRANCH/path/to/file
-            const cdnUrl = `https://cdn.jsdelivr.net/gh/AB-EDS/Model-Viewer@main/models/${encodeURIComponent(modelFile)}`;
-            
-            document.getElementById('modelTitle').textContent = modelFile.replace(/\.[^/.]+$/, "").replace(/-|_/g, ' ');
-            document.getElementById('fileName').textContent = modelFile;
-            document.getElementById('modelPath').textContent = `models/${modelFile}`;
-            document.getElementById('loadTime').textContent = new Date().toLocaleString();
+            if (!githubUrl) {
+                showError('Please enter your GitHub Pages URL!');
+                return;
+            }
 
-            // Construct 3DViewer.net embed URL with jsDelivr CDN
-            const viewerUrl = `https://3dviewer.net/embed.html#model=${encodeURIComponent(cdnUrl)}$backgroundcolor=240,245,250,255$defaultcolor=70,130,180$edgesettings=on,0,0,0,1`;
-            
-            const iframe = document.getElementById('viewer');
-            iframe.src = viewerUrl;
-            
-            iframe.onload = function() {
-                setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('status').textContent = 'Loaded Successfully';
-                    document.getElementById('status').style.color = '#28a745';
-                }, 1500);
-            };
+            const fileId = extractFileId(driveLink);
 
-            generateQRCode(currentPageUrl);
-            document.getElementById('currentUrl').textContent = currentPageUrl;
-        }
+            if (!fileId) {
+                showError('Could not extract File ID from the link. Please make sure you copied the entire share link from Google Drive.');
+                return;
+            }
 
-        function generateQRCode(url) {
+            generatedUrl = `${githubUrl}?file=${fileId}`;
+
+            document.getElementById('generatedUrl').textContent = generatedUrl;
+            document.getElementById('result').style.display = 'block';
+
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
             
-            new QRCode(qrContainer, {
-                text: url,
-                width: 256,
-                height: 256,
+            qrCode = new QRCode(qrContainer, {
+                text: generatedUrl,
+                width: 300,
+                height: 300,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function copyUrl() {
-            const url = document.getElementById('currentUrl').textContent;
-            navigator.clipboard.writeText(url).then(() => {
+            navigator.clipboard.writeText(generatedUrl).then(() => {
                 const btn = event.target;
                 const originalText = btn.textContent;
                 btn.textContent = '✓ Copied!';
-                btn.style.background = 'linear-gradient(135deg, #28a745 0%, #218838 100%)';
                 setTimeout(() => {
                     btn.textContent = originalText;
-                    btn.style.background = 'linear-gradient(135deg, #2a5298 0%, #1e3c72 100%)';
                 }, 2000);
             }).catch(err => {
-                alert('Failed to copy URL. Please copy manually.');
+                alert('Failed to copy. Please copy manually:\n\n' + generatedUrl);
             });
         }
 
@@ -380,19 +399,27 @@
             if (canvas) {
                 const url = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.download = `qr-code-${modelFile || 'model'}.png`;
+                const fileId = extractFileId(document.getElementById('driveLink').value);
+                link.download = `qr-code-${fileId}.png`;
                 link.href = url;
                 link.click();
             }
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.innerHTML = message;
-            errorDiv.style.display = 'block';
+        function testUrl() {
+            if (generatedUrl) {
+                window.open(generatedUrl, '_blank');
+            }
         }
 
-        init();
+        function reset() {
+            document.getElementById('driveLink').value = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('driveLink').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('driveLink').focus();
     </script>
 </body>
 </html>
